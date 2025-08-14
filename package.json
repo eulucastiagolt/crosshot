@@ -3,17 +3,17 @@
   "version": "1.0.0",
   "description": "Cross-platform desktop screenshot utility",
   "type": "module",
-  "main": "screenshot.js",
+  "main": "index.js",
   "exports": {
     ".": {
-      "import": "./screenshot.js"
+      "import": "./index.js"
     }
   },
   "bin": {
-    "crosshot": "./screenshot.js"
+    "crosshot": "./bin/crosshot"
   },
   "scripts": {
-    "test": "node screenshot.js",
+    "test": "node index.js",
     "example": "node example.js"
   },
   "keywords": [

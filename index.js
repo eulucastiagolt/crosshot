@@ -386,7 +386,7 @@ Crosshot - Cross-Platform Screenshot Utility
 `));
   console.log(chalk.white.bold('Usage:'));
   console.log(chalk.gray('  crosshot [options]') + chalk.dim('        (global installation)'));
-  console.log(chalk.gray('  node screenshot.js [options]') + chalk.dim(' (local/development)'));
+  console.log(chalk.gray('  node index.js [options]') + chalk.dim(' (local/development)'));
   
   console.log(chalk.white.bold('\nOptions:'));
   console.log(chalk.green('  -n, --name=<filename>') + chalk.gray('  Set custom filename for the screenshot (without extension)'));
@@ -417,10 +417,10 @@ Crosshot - Cross-Platform Screenshot Utility
   console.log(chalk.cyan('  crosshot ') + chalk.yellow('--verbose'));
   
   console.log(chalk.magenta('\nLocal/Development usage:'));
-  console.log(chalk.cyan('  node screenshot.js'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-n="important-capture"'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-o="~/Images/Screenshots/"'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('--help'));
+  console.log(chalk.cyan('  node index.js'));
+  console.log(chalk.cyan('  node index.js ') + chalk.yellow('-n="important-capture"'));
+  console.log(chalk.cyan('  node index.js ') + chalk.yellow('-o="~/Images/Screenshots/"'));
+  console.log(chalk.cyan('  node index.js ') + chalk.yellow('--help'));
 
   console.log(chalk.magenta('\nSupported formats: PNG (default), JPG/JPEG, BMP, WebP'));
   console.log(chalk.gray('Quality setting only affects lossy formats (JPG, WebP).'));

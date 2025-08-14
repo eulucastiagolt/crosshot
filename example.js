@@ -1,7 +1,7 @@
-// Example usage of the screenshot library
-// This file demonstrates different ways to use the screenshot functionality
+// Example usage of the crosshot library
+// This file demonstrates different ways to use the crosshot functionality
 
-import { takeScreenshot, captureScreen, getAvailableTools } from './screenshot.js';
+import { takeScreenshot, captureScreen, getAvailableTools } from './index.js';
 
 // Example 1: Basic library usage (silent mode)
 async function basicExample() {

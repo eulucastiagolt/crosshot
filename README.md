@@ -35,7 +35,9 @@ npm install crosshot
 git clone https://github.com/user/crosshot
 cd crosshot
 npm install
-node screenshot.js --help
+node index.js --help
+# or use the bin directly
+./bin/crosshot --help
 ```
 
 ## CLI Usage
@@ -81,18 +83,18 @@ crosshot --version
 
 #### Basic usage
 ```bash
-node screenshot.js
+node index.js
 ```
 
 #### With options
 ```bash
-node screenshot.js -n="my-screenshot"
-node screenshot.js -f="jpg" -q=85
+node index.js -n="my-screenshot"
+node index.js -f="jpg" -q=85
 ```
 
 #### Help
 ```bash
-node screenshot.js --help
+node index.js --help
 ```
 
 ## Library Usage
@@ -295,6 +297,22 @@ When failed, functions reject with detailed error information:
 ## Examples
 
 See `example.js` for comprehensive usage examples including error handling and different configuration options.
+
+### Quick Start
+
+```bash
+# Install globally
+npm install -g crosshot
+
+# Take a screenshot
+crosshot
+
+# With custom name and format
+crosshot -n="my-screenshot" -f="jpg" -q=85
+
+# See all options
+crosshot --help
+```
 
 ## License
 

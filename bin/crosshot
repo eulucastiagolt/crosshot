@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+
+// Crosshot CLI wrapper
+// This file imports and executes the main module
+
+import { spawn } from 'child_process';
+import { join, dirname } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const indexPath = join(__dirname, '..', 'index.js');
+
+// Forward all arguments to index.js
+const child = spawn('node', [indexPath, ...process.argv.slice(2)], {
+  stdio: 'inherit'
+});
+
+child.on('exit', (code) => {
+  process.exit(code);
+});
