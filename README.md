@@ -17,7 +17,7 @@ Cross-platform desktop screenshot utility compatible with Linux (X11/Wayland), W
 
 ### Global Installation (Recommended)
 ```bash
-npm install -g crosshot
+npm install -g @ltcode/crosshot
 ```
 
 After global installation, you can use `crosshot` command anywhere:
@@ -27,12 +27,12 @@ crosshot --help
 
 ### Local Installation
 ```bash
-npm install crosshot
+npm install @ltcode/crosshot
 ```
 
 ### Development/Local Usage
 ```bash
-git clone https://github.com/user/crosshot
+git clone https://github.com/ltcodedev/crosshot
 cd crosshot
 npm install
 node index.js --help
@@ -102,7 +102,7 @@ node index.js --help
 ### Basic Example
 
 ```javascript
-import { captureScreen } from 'crosshot';
+import { captureScreen } from '@ltcode/crosshot';
 
 try {
   const result = await captureScreen({
@@ -124,7 +124,7 @@ try {
 ### Format Examples
 
 ```javascript
-import { captureScreen } from 'crosshot';
+import { captureScreen } from '@ltcode/crosshot';
 
 // PNG (default, lossless)
 const pngResult = await captureScreen({
@@ -156,7 +156,7 @@ const bmpResult = await captureScreen({
 ### Advanced Example
 
 ```javascript
-import { takeScreenshot, getAvailableTools } from 'crosshot';
+import { takeScreenshot, getAvailableTools } from '@ltcode/crosshot';
 
 // Check available tools first
 const tools = await getAvailableTools();
@@ -302,7 +302,7 @@ See `example.js` for comprehensive usage examples including error handling and d
 
 ```bash
 # Install globally
-npm install -g crosshot
+npm install -g @ltcode/crosshot
 
 # Take a screenshot
 crosshot

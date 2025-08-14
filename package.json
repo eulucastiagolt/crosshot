@@ -1,5 +1,5 @@
 {
-  "name": "crosshot",
+  "name": "@ltcode/crosshot",
   "version": "1.0.0",
   "description": "Cross-platform desktop screenshot utility",
   "type": "module",
@@ -10,11 +10,14 @@
     }
   },
   "bin": {
-    "crosshot": "./bin/crosshot"
+    "crosshot": "bin/crosshot"
   },
   "scripts": {
     "test": "node index.js",
-    "example": "node example.js"
+    "example": "node example.js",
+    "prepublishOnly": "npm test",
+    "publish:npm": "npm publish",
+    "publish:dry": "npm publish --dry-run"
   },
   "keywords": [
     "electron",
@@ -30,8 +33,22 @@
     "capture",
     "screen"
   ],
-  "author": "Lucas Tiago",
+  "author": "Lucas Tiago <dev@lucastiago.com.br>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ltcodedev/crosshot.git"
+  },
+  "homepage": "https://github.com/ltcodedev/crosshot#readme",
+  "bugs": {
+    "url": "https://github.com/ltcodedev/crosshot/issues"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "chalk": "^5.5.0"
   }

@@ -137,3 +137,48 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# Crosshot specific files
+# Screenshot files generated during testing
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.bmp
+screenshot-*
+teste-*
+format-test-*
+library-test.*
+verbose-test.*
+tool-check-test.*
+
+# Test output directories
+examples/
+captures/
+screenshots/
+test-screenshots/
+
+# NPM publish files
+*.tgz
+ltcode-crosshot-*.tgz
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+*.orig

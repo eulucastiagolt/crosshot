@@ -1,0 +1,32 @@
+# Development files
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.bmp
+examples/
+.git/
+.gitignore
+.vscode/
+node_modules/
+.DS_Store
+Thumbs.db
+
+# Test files
+test/
+tests/
+*.test.js
+*.spec.js
+
+# Documentation drafts
+docs/
+*.md.backup
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

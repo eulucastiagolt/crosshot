@@ -424,7 +424,7 @@ Crosshot - Cross-Platform Screenshot Utility
 
   console.log(chalk.magenta('\nSupported formats: PNG (default), JPG/JPEG, BMP, WebP'));
   console.log(chalk.gray('Quality setting only affects lossy formats (JPG, WebP).'));
-  console.log(chalk.gray('Install globally: ') + chalk.white('npm install -g crosshot'));
+  console.log(chalk.gray('Install globally: ') + chalk.white('npm install -g @ltcode/crosshot'));
   console.log(chalk.gray('Tilde (~) expands to your home directory on Unix-like systems.'));
 }
 
