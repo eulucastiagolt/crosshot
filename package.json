@@ -1,0 +1,38 @@
+{
+  "name": "crosshot",
+  "version": "1.0.0",
+  "description": "Cross-platform desktop screenshot utility",
+  "type": "module",
+  "main": "screenshot.js",
+  "exports": {
+    ".": {
+      "import": "./screenshot.js"
+    }
+  },
+  "bin": {
+    "crosshot": "./screenshot.js"
+  },
+  "scripts": {
+    "test": "node screenshot.js",
+    "example": "node example.js"
+  },
+  "keywords": [
+    "electron",
+    "screenshot",
+    "desktop",
+    "cross-platform",
+    "wayland",
+    "x11",
+    "windows",
+    "macos",
+    "library",
+    "cli",
+    "capture",
+    "screen"
+  ],
+  "author": "Lucas Tiago",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.5.0"
+  }
+}
