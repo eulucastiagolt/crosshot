@@ -20,20 +20,47 @@ async function basicExample() {
     console.log('Size:', result.size.kb, 'KB');
     console.log('Tool used:', result.tool);
     console.log('Platform:', result.platform);
+    console.log('Format:', result.format);
     
   } catch (error) {
     console.error('Failed:', error.error || error.message);
   }
 }
 
-// Example 2: Verbose mode with custom options
+// Example 2: Different formats example
+async function formatExample() {
+  console.log('\n=== Different Formats Example ===');
+  
+  const formats = ['png', 'jpg', 'webp'];
+  
+  for (const format of formats) {
+    try {
+      console.log(`Taking screenshot in ${format.toUpperCase()} format...`);
+      const result = await captureScreen({
+        outputDir: './examples/',
+        filename: `format-test-${format}`,
+        format: format,
+        quality: format === 'jpg' ? 85 : 100,
+        silent: true
+      });
+      
+      console.log(`✓ ${format.toUpperCase()}: ${result.filename} (${result.size.kb} KB)`);
+      
+    } catch (error) {
+      console.error(`✗ ${format.toUpperCase()}: ${error.error || error.message}`);
+    }
+  }
+}
+
+// Example 3: Verbose mode with custom options
 async function verboseExample() {
   console.log('\n=== Verbose Mode Example ===');
   
   try {
     const result = await takeScreenshot('./examples/', 'verbose-test', {
       silent: false,
-      verbose: true
+      verbose: true,
+      format: 'png'
     });
     
     console.log('\nDetailed result:');
@@ -44,7 +71,7 @@ async function verboseExample() {
   }
 }
 
-// Example 3: Check available tools before taking screenshot
+// Example 4: Check available tools before taking screenshot
 async function toolCheckExample() {
   console.log('\n=== Tool Check Example ===');
   
@@ -70,7 +97,7 @@ async function toolCheckExample() {
   }
 }
 
-// Example 4: Error handling
+// Example 5: Error handling
 async function errorHandlingExample() {
   console.log('\n=== Error Handling Example ===');
   
@@ -107,6 +134,7 @@ async function runExamples() {
   console.log('===========================');
   
   await basicExample();
+  await formatExample();
   await verboseExample();
   await toolCheckExample();
   await errorHandlingExample();

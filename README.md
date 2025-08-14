@@ -11,38 +11,86 @@ Cross-platform desktop screenshot utility compatible with Linux (X11/Wayland), W
 - 🔧 **Configurable**: Silent mode, verbose mode, custom paths
 - 📁 **Smart directory handling**: Automatically creates directories if needed
 - 🔍 **Tool detection**: Check what screenshot tools are available on your system
+- 🌍 **Global CLI**: Install globally via npm for system-wide access
 
 ## Installation
 
+### Global Installation (Recommended)
+```bash
+npm install -g crosshot
+```
+
+After global installation, you can use `crosshot` command anywhere:
+```bash
+crosshot --help
+```
+
+### Local Installation
 ```bash
 npm install crosshot
 ```
 
+### Development/Local Usage
+```bash
+git clone https://github.com/user/crosshot
+cd crosshot
+npm install
+node screenshot.js --help
+```
+
 ## CLI Usage
 
-### Basic usage
+### Global Usage (After `npm install -g crosshot`)
+
+#### Basic usage
+```bash
+crosshot
+```
+
+#### With custom filename
+```bash
+crosshot -n="my-screenshot"
+crosshot --name="important-capture"
+```
+
+#### With custom output directory
+```bash
+crosshot -o="./screenshots/"
+crosshot --output="~/Images/Screenshots/"
+```
+
+#### With different formats
+```bash
+crosshot -f="jpg" -q=85
+crosshot --format="webp"
+crosshot -n="capture" -f="bmp"
+```
+
+#### Combined options
+```bash
+crosshot -n="bug-report" -o="./captures/" -f="jpg" -q=90
+```
+
+#### Help and version
+```bash
+crosshot --help
+crosshot --version
+```
+
+### Local Usage (Development)
+
+#### Basic usage
 ```bash
 node screenshot.js
 ```
 
-### With custom filename
+#### With options
 ```bash
 node screenshot.js -n="my-screenshot"
-node screenshot.js --name="important-capture"
+node screenshot.js -f="jpg" -q=85
 ```
 
-### With custom output directory
-```bash
-node screenshot.js -o="./screenshots/"
-node screenshot.js --output="~/Images/Screenshots/"
-```
-
-### Combined options
-```bash
-node screenshot.js -n="bug-report" -o="./captures/"
-```
-
-### Help
+#### Help
 ```bash
 node screenshot.js --help
 ```
@@ -58,15 +106,49 @@ try {
   const result = await captureScreen({
     outputDir: './screenshots/',
     filename: 'my-capture',
+    format: 'png',
     silent: true
   });
   
   console.log('Screenshot saved:', result.filepath);
   console.log('File size:', result.size.kb, 'KB');
+  console.log('Format:', result.format);
   console.log('Tool used:', result.tool);
 } catch (error) {
   console.error('Failed to take screenshot:', error.error);
 }
+```
+
+### Format Examples
+
+```javascript
+import { captureScreen } from 'crosshot';
+
+// PNG (default, lossless)
+const pngResult = await captureScreen({
+  filename: 'screenshot',
+  format: 'png'
+});
+
+// JPG with custom quality
+const jpgResult = await captureScreen({
+  filename: 'screenshot',
+  format: 'jpg',
+  quality: 85  // 1-100, affects file size
+});
+
+// WebP (modern format, good compression)
+const webpResult = await captureScreen({
+  filename: 'screenshot',
+  format: 'webp',
+  quality: 90
+});
+
+// BMP (uncompressed)
+const bmpResult = await captureScreen({
+  filename: 'screenshot',
+  format: 'bmp'
+});
 ```
 
 ### Advanced Example
@@ -81,7 +163,9 @@ console.log('Available tools:', tools.available);
 if (tools.hasTools) {
   const result = await takeScreenshot('./output/', 'custom-name', {
     silent: false,    // Show console output
-    verbose: true     // Show detailed information
+    verbose: true,    // Show detailed information
+    format: 'jpg',    // JPG format
+    quality: 85       // Quality setting
   });
   
   console.log('Result:', result);
@@ -101,6 +185,8 @@ Convenience function for taking screenshots with simplified options.
   - `silent` (boolean): Suppress console output (default: true)
   - `verbose` (boolean): Show detailed information (default: false)
   - `createDir` (boolean): Create directory if it doesn't exist (default: true)
+  - `format` (string): Output format - 'png', 'jpg', 'jpeg', 'bmp', 'webp' (default: 'png')
+  - `quality` (number): Quality for lossy formats, 1-100 (default: 100)
 
 **Returns:** Promise resolving to result object
 
@@ -114,6 +200,8 @@ Main screenshot function with full control.
 - `options` (Object, optional)
   - `silent` (boolean): Suppress console output (default: false)
   - `verbose` (boolean): Show detailed information (default: false)
+  - `format` (string): Output format - 'png', 'jpg', 'jpeg', 'bmp', 'webp' (default: 'png')
+  - `quality` (number): Quality for lossy formats, 1-100 (default: 100)
 
 **Returns:** Promise resolving to result object
 
@@ -173,20 +261,36 @@ When failed, functions reject with detailed error information:
 ## Supported Tools
 
 ### Linux
-- **grim** (recommended for Wayland)
-- **gnome-screenshot** (GNOME environments)
-- **spectacle** (KDE Plasma)
-- **wayshot** (Wayland alternative)
-- **flameshot** (GUI with features)
-- **scrot** (X11 systems)
-- **maim** (X11 alternative)
+- **grim** (recommended for Wayland) - supports PNG, JPG, WebP, PPM
+- **gnome-screenshot** (GNOME environments) - PNG only
+- **spectacle** (KDE Plasma) - multiple formats based on extension
+- **wayshot** (Wayland alternative) - PNG and JPG
+- **flameshot** (GUI with features) - PNG and JPG
+- **scrot** (X11 systems) - PNG, JPG based on extension
+- **maim** (X11 alternative) - PNG, JPG based on extension
 
 ### Windows
-- **PowerShell** (native, built-in)
-- **NirCmd** (third-party utility)
+- **PowerShell** (native, built-in) - PNG, JPG, BMP (WebP fallback to PNG)
+- **NirCmd** (third-party utility) - multiple formats
 
 ### macOS
-- **screencapture** (native, built-in)
+- **screencapture** (native, built-in) - PNG, JPG
+
+## Supported Formats
+
+| Format | Extension | Type | Quality Setting | Notes |
+|--------|-----------|------|-----------------|--------|
+| PNG    | `.png`    | Lossless | N/A | Default format, best quality |
+| JPG    | `.jpg`    | Lossy | 1-100 | Good compression, use quality setting |
+| JPEG   | `.jpg`    | Lossy | 1-100 | Same as JPG |
+| WebP   | `.webp`   | Lossy/Lossless | 1-100 | Modern format, excellent compression |
+| BMP    | `.bmp`    | Uncompressed | N/A | Large files, maximum compatibility |
+
+**Format Recommendations:**
+- **PNG**: Best for screenshots with text, UI elements, or when quality is priority
+- **JPG**: Good for photos or when smaller file size is needed (use quality 80-90)
+- **WebP**: Modern format with excellent compression, good browser support
+- **BMP**: Only when maximum compatibility is required (creates large files)
 
 ## Examples
 
@@ -208,7 +312,11 @@ MIT License - see LICENSE file for details.
 
 ### v1.0.0
 - Initial release
-- Cross-platform screenshot support
+- Cross-platform screenshot support (Linux, Windows, macOS)
+- Multiple format support (PNG, JPG, WebP, BMP)
+- Quality settings for lossy formats
 - CLI and library interfaces
-- Colored terminal output
+- Colored terminal output with Chalk
+- Automatic tool detection and fallbacks
+- Comprehensive error handling with suggestions
 - Comprehensive error handling

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // Cross-platform desktop screenshot utility
 // Compatible with Linux (X11/Wayland), Windows and macOS
 
@@ -14,18 +16,34 @@ const __dirname = dirname(__filename);
 
 export function takeScreenshot(destinationDir = __dirname, customName = null, options = {}) {
   return new Promise((resolve, reject) => {
-    const filename = customName ? `${customName}.png` : `screenshot-${Date.now()}.png`;
-    const filepath = join(destinationDir, filename);
-    const currentPlatform = platform();
-    
     // Default options for library usage
     const config = {
       silent: false,        // If true, suppresses console output (useful for library usage)
       verbose: false,       // If true, shows more detailed information
-      format: 'png',        // Screenshot format (currently only PNG supported)
-      quality: 100,         // Quality (for future use)
+      format: 'png',        // Screenshot format: png, jpg, jpeg, bmp, webp
+      quality: 100,         // Quality for lossy formats (jpg, webp)
       ...options
     };
+    
+    // Normalize format
+    const normalizedFormat = config.format.toLowerCase();
+    const validFormats = ['png', 'jpg', 'jpeg', 'bmp', 'webp'];
+    
+    if (!validFormats.includes(normalizedFormat)) {
+      reject({
+        success: false,
+        error: `Unsupported format: ${config.format}. Supported formats: ${validFormats.join(', ')}`,
+        platform: platform(),
+        timestamp: new Date().toISOString(),
+        suggestions: [`Use one of these formats: ${validFormats.join(', ')}`]
+      });
+      return;
+    }
+    
+    const fileExtension = normalizedFormat === 'jpeg' ? 'jpg' : normalizedFormat;
+    const filename = customName ? `${customName}.${fileExtension}` : `screenshot-${Date.now()}.${fileExtension}`;
+    const filepath = join(destinationDir, filename);
+    const currentPlatform = platform();
     
     // Only log if not in silent mode
     const log = (...args) => !config.silent && config.verbose && console.log(...args);
@@ -36,31 +54,59 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
     
     let commands = [];
     
-    // Platform-specific commands
+    // Platform-specific commands with format support
     if (currentPlatform === 'win32') {
-      // Windows
+      // Windows - PowerShell supports multiple formats
+      const formatMap = {
+        'png': 'Png',
+        'jpg': 'Jpeg', 
+        'jpeg': 'Jpeg',
+        'bmp': 'Bmp',
+        'webp': 'Png' // WebP not natively supported, fallback to PNG
+      };
+      const psFormat = formatMap[normalizedFormat];
+      
       commands = [
-        `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $screen = [System.Windows.Forms.Screen]::PrimaryScreen; $bitmap = New-Object System.Drawing.Bitmap($screen.Bounds.Width, $screen.Bounds.Height); $graphics = [System.Drawing.Graphics]::FromImage($bitmap); $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size); $bitmap.Save('${filepath.replace(/\\/g, '/')}', [System.Drawing.Imaging.ImageFormat]::Png); $graphics.Dispose(); $bitmap.Dispose()"`,
+        `powershell -Command "Add-Type -AssemblyName System.Windows.Forms; $screen = [System.Windows.Forms.Screen]::PrimaryScreen; $bitmap = New-Object System.Drawing.Bitmap($screen.Bounds.Width, $screen.Bounds.Height); $graphics = [System.Drawing.Graphics]::FromImage($bitmap); $graphics.CopyFromScreen($screen.Bounds.X, $screen.Bounds.Y, 0, 0, $screen.Bounds.Size); $bitmap.Save('${filepath.replace(/\\/g, '/')}', [System.Drawing.Imaging.ImageFormat]::${psFormat}); $graphics.Dispose(); $bitmap.Dispose()"`,
         `nircmd savescreenshot "${filepath}"`,
         `screencapture "${filepath}"`
       ];
     } else if (currentPlatform === 'darwin') {
-      // macOS
-      commands = [
-        `screencapture "${filepath}"`,
-        `screencapture -x "${filepath}"`
-      ];
+      // macOS - screencapture supports jpg and png
+      const macFormats = ['png', 'jpg', 'jpeg'];
+      if (macFormats.includes(normalizedFormat)) {
+        const formatFlag = normalizedFormat === 'png' ? '' : ' -t jpg';
+        commands = [
+          `screencapture${formatFlag} "${filepath}"`,
+          `screencapture -x${formatFlag} "${filepath}"`
+        ];
+      } else {
+        // Fallback to PNG for unsupported formats on macOS
+        const fallbackPath = filepath.replace(new RegExp(`\\.${fileExtension}$`), '.png');
+        commands = [
+          `screencapture "${fallbackPath}"`,
+          `screencapture -x "${fallbackPath}"`
+        ];
+      }
     } else {
-      // Linux (X11/Wayland)
-      commands = [
-        `grim "${filepath}"`,                                  // Best for Wayland
-        `gnome-screenshot -f "${filepath}"`,                   // Works with GNOME/Wayland
-        `spectacle -b -n -o "${filepath}"`,                    // KDE Plasma/Wayland
-        `wayshot -f "${filepath}"`,                            // Another Wayland option
-        `flameshot full -p "${dirname(filepath)}" -d 0`,      // Flameshot (saves with own name)
-        `scrot "${filepath}"`,                                 // Fallback for X11
-        `maim "${filepath}"`                                   // Another X11 fallback
-      ];
+      // Linux (X11/Wayland) - Different tools support different formats
+      commands = [];
+      
+      // grim (Wayland) - supports png, jpg, webp, ppm
+      if (['png', 'jpg', 'jpeg', 'webp'].includes(normalizedFormat)) {
+        const grimFormat = normalizedFormat === 'jpeg' ? 'jpg' : normalizedFormat;
+        commands.push(`grim -t ${grimFormat} "${filepath}"`);
+      }
+      
+      // Add other Linux tools with format support
+      commands.push(
+        `gnome-screenshot -f "${filepath}"`,                   // PNG only, but widely compatible
+        `spectacle -b -n -o "${filepath}"`,                    // Supports multiple formats based on extension
+        `wayshot -f "${filepath}"`,                            // Supports PNG and JPG
+        `flameshot full -p "${dirname(filepath)}" -d 0`,      // Saves with own name, supports PNG/JPG
+        `scrot "${filepath}"`,                                 // Supports PNG, JPG based on extension
+        `maim "${filepath}"`                                   // Supports PNG, JPG based on extension
+      );
     }
     
     function tryCommand(index) {
@@ -141,8 +187,8 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
               },
               tool: toolName,
               platform: currentPlatform,
+              format: normalizedFormat,
               timestamp: new Date().toISOString(),
-              format: 'png',
               metadata: {
                 created: stats.birthtime,
                 modified: stats.mtime,
@@ -222,7 +268,9 @@ export async function captureScreen(options = {}) {
     filename = null,
     silent = true,
     verbose = false,
-    createDir = true
+    createDir = true,
+    format = 'png',
+    quality = 100
   } = options;
 
   try {
@@ -243,7 +291,9 @@ export async function captureScreen(options = {}) {
 
     const result = await takeScreenshot(outputDir, filename, { 
       silent, 
-      verbose 
+      verbose,
+      format,
+      quality 
     });
     
     return result;
@@ -313,6 +363,10 @@ function parseArguments() {
       options.output = outputPath.startsWith('~/') 
         ? join(process.env.HOME || process.env.USERPROFILE, outputPath.slice(2))
         : outputPath;
+    } else if (arg.startsWith('-f=') || arg.startsWith('--format=')) {
+      options.format = arg.split('=')[1].replace(/["']/g, '').toLowerCase();
+    } else if (arg.startsWith('-q=') || arg.startsWith('--quality=')) {
+      options.quality = parseInt(arg.split('=')[1]) || 100;
     } else if (arg.startsWith('--help') || arg.startsWith('-h')) {
       options.help = true;
     } else if (arg.startsWith('--verbose')) {
@@ -328,10 +382,11 @@ function parseArguments() {
 // Function to display help information
 function showHelp() {
   console.log(chalk.cyan.bold(`
-Cross-Platform Screenshot Utility
+Crosshot - Cross-Platform Screenshot Utility
 `));
   console.log(chalk.white.bold('Usage:'));
-  console.log(chalk.gray('  node screenshot.js [options]'));
+  console.log(chalk.gray('  crosshot [options]') + chalk.dim('        (global installation)'));
+  console.log(chalk.gray('  node screenshot.js [options]') + chalk.dim(' (local/development)'));
   
   console.log(chalk.white.bold('\nOptions:'));
   console.log(chalk.green('  -n, --name=<filename>') + chalk.gray('  Set custom filename for the screenshot (without extension)'));
@@ -341,21 +396,35 @@ Cross-Platform Screenshot Utility
   console.log(chalk.gray('                       Example: ') + chalk.yellow('-o="~/Images/Screenshots/"') + chalk.gray(' or ') + chalk.yellow('--output="./"'));
   console.log(chalk.gray('                       Note: Directory will be created if it doesn\'t exist'));
   
+  console.log(chalk.green('  -f, --format=<type>') + chalk.gray('   Set output format (png, jpg, jpeg, bmp, webp)'));
+  console.log(chalk.gray('                       Example: ') + chalk.yellow('-f="jpg"') + chalk.gray(' or ') + chalk.yellow('--format=webp'));
+  console.log(chalk.gray('                       Default: png'));
+  
+  console.log(chalk.green('  -q, --quality=<num>') + chalk.gray('   Set quality for lossy formats (1-100)'));
+  console.log(chalk.gray('                       Example: ') + chalk.yellow('-q=85') + chalk.gray(' or ') + chalk.yellow('--quality=90'));
+  console.log(chalk.gray('                       Default: 100 (only affects jpg/webp)'));
+  
   console.log(chalk.green('  --verbose') + chalk.gray('            Show detailed information and result object'));
   console.log(chalk.green('  -v, --version') + chalk.gray('        Show version information'));
   console.log(chalk.green('  -h, --help') + chalk.gray('           Show this help message'));
 
   console.log(chalk.white.bold('\nExamples:'));
+  console.log(chalk.magenta('Global usage:'));
+  console.log(chalk.cyan('  crosshot'));
+  console.log(chalk.cyan('  crosshot ') + chalk.yellow('-n="important-capture"'));
+  console.log(chalk.cyan('  crosshot ') + chalk.yellow('-f="jpg" -q=85'));
+  console.log(chalk.cyan('  crosshot ') + chalk.yellow('-n="screenshot" -f="webp"'));
+  console.log(chalk.cyan('  crosshot ') + chalk.yellow('--verbose'));
+  
+  console.log(chalk.magenta('\nLocal/Development usage:'));
   console.log(chalk.cyan('  node screenshot.js'));
   console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-n="important-capture"'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('--name="important-capture"'));
   console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-o="~/Images/Screenshots/"'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-n="bug-report" -o="./captures/"'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('--verbose') + chalk.gray(' (show detailed information)'));
-  console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('-v') + chalk.gray(' (show version)'));
   console.log(chalk.cyan('  node screenshot.js ') + chalk.yellow('--help'));
 
-  console.log(chalk.magenta('\nThe screenshot will be saved as PNG format in the specified or current directory.'));
+  console.log(chalk.magenta('\nSupported formats: PNG (default), JPG/JPEG, BMP, WebP'));
+  console.log(chalk.gray('Quality setting only affects lossy formats (JPG, WebP).'));
+  console.log(chalk.gray('Install globally: ') + chalk.white('npm install -g crosshot'));
   console.log(chalk.gray('Tilde (~) expands to your home directory on Unix-like systems.'));
 }
 
@@ -391,7 +460,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   
   takeScreenshot(outputDir, options.name, { 
     silent: false, 
-    verbose: options.verbose || false 
+    verbose: options.verbose || false,
+    format: options.format || 'png',
+    quality: options.quality || 100
   })
     .then(result => {
       if (options.verbose) {

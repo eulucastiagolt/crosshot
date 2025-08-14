@@ -39,7 +39,7 @@ export interface ScreenshotError {
 export interface ScreenshotOptions {
   silent?: boolean;
   verbose?: boolean;
-  format?: string;
+  format?: 'png' | 'jpg' | 'jpeg' | 'bmp' | 'webp';
   quality?: number;
 }
 
@@ -49,6 +49,8 @@ export interface CaptureScreenOptions {
   silent?: boolean;
   verbose?: boolean;
   createDir?: boolean;
+  format?: 'png' | 'jpg' | 'jpeg' | 'bmp' | 'webp';
+  quality?: number;
 }
 
 /**
