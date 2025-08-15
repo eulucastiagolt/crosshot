@@ -42,7 +42,7 @@ node index.js --help
 
 ## CLI Usage
 
-### Global Usage (After `npm install -g crosshot`)
+### Global Usage (After `npm install -g @ltcode/crosshot`)
 
 #### Basic usage
 ```bash

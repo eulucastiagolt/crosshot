@@ -10,7 +10,7 @@ import chalk from 'chalk';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-export function takeScreenshot(destinationDir = __dirname, customName = null, options = {}) {
+export function takeScreenshot(destinationDir = "./", customName = null, options = {}) {
   return new Promise((resolve, reject) => {
     const config = {
       silent: false,
@@ -238,7 +238,7 @@ function showVersion() {
   console.log(chalk.white(`Version: ${version}`));
   console.log(chalk.gray(`Platform: ${currentPlatform}`));
   console.log(chalk.gray('Cross-platform desktop screenshot utility'));
-  console.log(chalk.blue('\nRepository: ') + chalk.underline('https://github.com/user/crosshot'));
+  console.log(chalk.blue('\nRepository: ') + chalk.underline('https://github.com/ltcodedev/crosshot'));
   console.log(chalk.green('License: MIT'));
 }
 
@@ -442,7 +442,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(0);
   }
   
-  const outputDir = options.output || __dirname;
+  const outputDir = options.output || "./";
   
   try {
     if (!existsSync(outputDir)) {
