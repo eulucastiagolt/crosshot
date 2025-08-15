@@ -8,7 +8,9 @@
   "exports": {
     ".": {
       "import": "./index.js",
-      "types": "./crosshot.d.ts"
+      "require": "./index.js",
+      "types": "./crosshot.d.ts",
+      "default": "./index.js"
     }
   },
   "bin": {
