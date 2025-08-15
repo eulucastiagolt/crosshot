@@ -4,9 +4,11 @@
   "description": "Cross-platform desktop screenshot utility",
   "type": "module",
   "main": "index.js",
+  "types": "crosshot.d.ts",
   "exports": {
     ".": {
-      "import": "./index.js"
+      "import": "./index.js",
+      "types": "./crosshot.d.ts"
     }
   },
   "bin": {
