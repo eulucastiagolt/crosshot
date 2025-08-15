@@ -1,8 +1,5 @@
 #!/usr/bin/env node
 
-// Cross-platform desktop screenshot utility
-// Compatible with Linux (X11/Wayland), Windows and macOS
-
 import { exec } from 'child_process';
 import { join, dirname } from 'path';
 import { existsSync, statSync, mkdirSync, readFileSync } from 'fs';
@@ -10,23 +7,20 @@ import { platform } from 'os';
 import { fileURLToPath } from 'url';
 import chalk from 'chalk';
 
-// Get __dirname equivalent for ES modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 export function takeScreenshot(destinationDir = __dirname, customName = null, options = {}) {
   return new Promise((resolve, reject) => {
-    // Default options for library usage
     const config = {
-      silent: false,        // If true, suppresses console output (useful for library usage)
-      verbose: false,       // If true, shows more detailed information
-      format: 'png',        // Screenshot format: png, jpg, jpeg, bmp, webp
-      quality: 100,         // Quality for lossy formats (jpg, webp)
-      returnBase64: false,  // If true, returns base64 string instead of saving file
+      silent: false,
+      verbose: false,
+      format: 'png',
+      quality: 100,
+      returnBase64: false,
       ...options
     };
     
-    // Normalize format
     const normalizedFormat = config.format.toLowerCase();
     const validFormats = ['png', 'jpg', 'jpeg', 'bmp', 'webp'];
     
@@ -46,7 +40,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
     const filepath = join(destinationDir, filename);
     const currentPlatform = platform();
     
-    // Only log if not in silent mode
     const log = (...args) => !config.silent && config.verbose && console.log(...args);
     const logError = (...args) => !config.silent && console.error(...args);
     
@@ -55,15 +48,13 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
     
     let commands = [];
     
-    // Platform-specific commands with format support
     if (currentPlatform === 'win32') {
-      // Windows - PowerShell supports multiple formats
       const formatMap = {
         'png': 'Png',
         'jpg': 'Jpeg', 
         'jpeg': 'Jpeg',
         'bmp': 'Bmp',
-        'webp': 'Png' // WebP not natively supported, fallback to PNG
+        'webp': 'Png'
       };
       const psFormat = formatMap[normalizedFormat];
       
@@ -73,7 +64,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
         `screencapture "${filepath}"`
       ];
     } else if (currentPlatform === 'darwin') {
-      // macOS - screencapture supports jpg and png
       const macFormats = ['png', 'jpg', 'jpeg'];
       if (macFormats.includes(normalizedFormat)) {
         const formatFlag = normalizedFormat === 'png' ? '' : ' -t jpg';
@@ -82,7 +72,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
           `screencapture -x${formatFlag} "${filepath}"`
         ];
       } else {
-        // Fallback to PNG for unsupported formats on macOS
         const fallbackPath = filepath.replace(new RegExp(`\\.${fileExtension}$`), '.png');
         commands = [
           `screencapture "${fallbackPath}"`,
@@ -90,23 +79,20 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
         ];
       }
     } else {
-      // Linux (X11/Wayland) - Different tools support different formats
       commands = [];
       
-      // grim (Wayland) - supports png, jpg, webp, ppm
       if (['png', 'jpg', 'jpeg', 'webp'].includes(normalizedFormat)) {
         const grimFormat = normalizedFormat === 'jpeg' ? 'jpg' : normalizedFormat;
         commands.push(`grim -t ${grimFormat} "${filepath}"`);
       }
       
-      // Add other Linux tools with format support
       commands.push(
-        `gnome-screenshot -f "${filepath}"`,                   // PNG only, but widely compatible
-        `spectacle -b -n -o "${filepath}"`,                    // Supports multiple formats based on extension
-        `wayshot -f "${filepath}"`,                            // Supports PNG and JPG
-        `flameshot full -p "${dirname(filepath)}" -d 0`,      // Saves with own name, supports PNG/JPG
-        `scrot "${filepath}"`,                                 // Supports PNG, JPG based on extension
-        `maim "${filepath}"`                                   // Supports PNG, JPG based on extension
+        `gnome-screenshot -f "${filepath}"`,
+        `spectacle -b -n -o "${filepath}"`,
+        `wayshot -f "${filepath}"`,
+        `flameshot full -p "${dirname(filepath)}" -d 0`,
+        `scrot "${filepath}"`,
+        `maim "${filepath}"`
       );
     }
     
@@ -138,7 +124,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
           log(chalk.magenta('\nInstall using your system package manager ') + chalk.cyan('(apt, pacman, dnf, etc.)'));
         }
         
-        // Return detailed error object for library usage
         reject({
           success: false,
           error: errorMessage,
@@ -162,19 +147,15 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
           }
           tryCommand(index + 1);
         } else {
-          // Check if file was created
           if (existsSync(filepath)) {
-            // Verbose logging only
             log(chalk.green.bold(`SUCCESS: Screenshot captured with ${toolName}!`));
             log(chalk.blue('File saved at: ') + chalk.white.underline(filepath));
             
-            // Show file size
             const stats = statSync(filepath);
             const sizeKB = (stats.size / 1024).toFixed(2);
             const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
             log(chalk.magenta('Size: ') + chalk.cyan(`${sizeKB} KB`));
             
-            // Prepare base result object
             const result = {
               success: true,
               filename: filename,
@@ -197,7 +178,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
               }
             };
 
-            // Add base64 data if requested
             if (config.returnBase64) {
               try {
                 const imageBuffer = readFileSync(filepath);
@@ -213,7 +193,6 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
               }
             }
             
-            // Return comprehensive success object for library usage
             resolve(result);
           } else {
             log(chalk.red(`ERROR: Failed to save with ${toolName}, trying next...`));
@@ -227,10 +206,8 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
   });
 }
 
-// Export function for use in other modules
 export default takeScreenshot;
 
-// Helper function to get MIME type based on format
 function getMimeType(format) {
   const mimeTypes = {
     'png': 'image/png',
@@ -242,7 +219,6 @@ function getMimeType(format) {
   return mimeTypes[format] || 'image/png';
 }
 
-// Function to get package version
 function getVersion() {
   try {
     const packagePath = join(__dirname, 'package.json');
@@ -254,7 +230,6 @@ function getVersion() {
   }
 }
 
-// Function to display version information
 function showVersion() {
   const version = getVersion();
   const currentPlatform = platform();
@@ -267,7 +242,6 @@ function showVersion() {
   console.log(chalk.green('License: MIT'));
 }
 
-// Helper function to get installation suggestions based on platform
 function getSuggestions(currentPlatform) {
   if (currentPlatform === 'win32') {
     return [
@@ -293,7 +267,6 @@ function getSuggestions(currentPlatform) {
   }
 }
 
-// Convenience function for library usage with better error handling
 export async function captureScreen(options = {}) {
   const {
     outputDir = process.cwd(),
@@ -307,7 +280,6 @@ export async function captureScreen(options = {}) {
   } = options;
 
   try {
-    // Check if directory exists
     if (!existsSync(outputDir)) {
       if (createDir) {
         mkdirSync(outputDir, { recursive: true });
@@ -336,7 +308,6 @@ export async function captureScreen(options = {}) {
   }
 }
 
-// Function to check available screenshot tools
 export function getAvailableTools() {
   return new Promise((resolve) => {
     const currentPlatform = platform();
@@ -373,7 +344,6 @@ export function getAvailableTools() {
   });
 }
 
-// Export function to get library version
 export function getLibraryVersion() {
   return {
     version: getVersion(),
@@ -383,17 +353,15 @@ export function getLibraryVersion() {
   };
 }
 
-// Function to parse command line arguments
 function parseArguments() {
   const args = process.argv.slice(2);
   const options = {};
   
   args.forEach(arg => {
     if (arg.startsWith('--name=') || arg.startsWith('-n=')) {
-      options.name = arg.split('=')[1].replace(/["']/g, ''); // Remove quotes
+      options.name = arg.split('=')[1].replace(/["']/g, '');
     } else if (arg.startsWith('-o=') || arg.startsWith('--output=')) {
-      const outputPath = arg.split('=')[1].replace(/["']/g, ''); // Remove quotes
-      // Expand tilde (~) to home directory
+      const outputPath = arg.split('=')[1].replace(/["']/g, '');
       options.output = outputPath.startsWith('~/') 
         ? join(process.env.HOME || process.env.USERPROFILE, outputPath.slice(2))
         : outputPath;
@@ -413,7 +381,6 @@ function parseArguments() {
   return options;
 }
 
-// Function to display help information
 function showHelp() {
   console.log(chalk.cyan.bold(`
 Crosshot - Cross-Platform Screenshot Utility
@@ -462,7 +429,6 @@ Crosshot - Cross-Platform Screenshot Utility
   console.log(chalk.gray('Tilde (~) expands to your home directory on Unix-like systems.'));
 }
 
-// If executed directly, run the capture
 if (import.meta.url === `file://${process.argv[1]}`) {
   const options = parseArguments();
   
@@ -476,10 +442,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     process.exit(0);
   }
   
-  // Determine output directory
   const outputDir = options.output || __dirname;
   
-  // Create directory if it doesn't exist
   try {
     if (!existsSync(outputDir)) {
       mkdirSync(outputDir, { recursive: true });
@@ -504,7 +468,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         console.log(chalk.gray('Detailed result:'));
         console.log(JSON.stringify(result, null, 2));
       } else {
-        // Minimal output for CLI - just success and path
         console.log(chalk.green('✓ Success'));
         console.log(chalk.white(result.filepath));
       }
