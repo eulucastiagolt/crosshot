@@ -52,7 +52,39 @@ async function formatExample() {
   }
 }
 
-// Example 3: Verbose mode with custom options
+// Example 3: Base64 example (Library only feature)
+async function base64Example() {
+  console.log('\n=== Base64 Example (Library Feature) ===');
+  
+  try {
+    console.log('Taking screenshot with base64 return...');
+    const result = await captureScreen({
+      outputDir: './examples/',
+      filename: 'base64-test',
+      format: 'png',
+      returnBase64: true,
+      silent: true
+    });
+    
+    console.log(`✓ Success: ${result.filename} (${result.size.kb} KB)`);
+    console.log(`✓ File saved: ${result.filepath}`);
+    console.log(`✓ Base64 generated: ${result.base64Raw.substring(0, 50)}...`);
+    console.log(`✓ Data URL length: ${result.base64.length} characters`);
+    console.log(`✓ MIME type: ${result.base64.split(';')[0].split(':')[1]}`);
+    
+    // Example of using base64 data
+    console.log('\nBase64 data can be used for:');
+    console.log('- Web APIs (img src="data:image/png;base64,...")');
+    console.log('- Email attachments');
+    console.log('- Database storage');
+    console.log('- API responses');
+    
+  } catch (error) {
+    console.error(`✗ Base64 example failed: ${error.error || error.message}`);
+  }
+}
+
+// Example 4: Verbose mode with custom options
 async function verboseExample() {
   console.log('\n=== Verbose Mode Example ===');
   
@@ -71,7 +103,7 @@ async function verboseExample() {
   }
 }
 
-// Example 4: Check available tools before taking screenshot
+// Example 5: Check available tools before taking screenshot
 async function toolCheckExample() {
   console.log('\n=== Tool Check Example ===');
   
@@ -97,7 +129,7 @@ async function toolCheckExample() {
   }
 }
 
-// Example 5: Error handling
+// Example 6: Error handling
 async function errorHandlingExample() {
   console.log('\n=== Error Handling Example ===');
   
@@ -135,6 +167,7 @@ async function runExamples() {
   
   await basicExample();
   await formatExample();
+  await base64Example();
   await verboseExample();
   await toolCheckExample();
   await errorHandlingExample();

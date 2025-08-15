@@ -153,6 +153,42 @@ const bmpResult = await captureScreen({
 });
 ```
 
+### Base64 Examples (Library Feature)
+
+```javascript
+import { captureScreen } from '@ltcode/crosshot';
+
+// Get screenshot as base64 data URL
+const result = await captureScreen({
+  filename: 'screenshot',
+  format: 'png',
+  returnBase64: true
+});
+
+console.log(result.filepath);    // File path: ./screenshot.png
+console.log(result.base64);      // Data URL: data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...
+console.log(result.base64Raw);   // Raw base64: iVBORw0KGgoAAAANSUhEUgAA...
+
+// Use in web context
+const img = document.createElement('img');
+img.src = result.base64;
+
+// Different formats with base64
+const jpegBase64 = await captureScreen({
+  format: 'jpg',
+  quality: 85,
+  returnBase64: true
+});
+
+const webpBase64 = await captureScreen({
+  format: 'webp', 
+  quality: 90,
+  returnBase64: true
+});
+```
+
+**Note**: The `returnBase64` option is only available when using Crosshot as a library. The CLI always saves to files.
+
 ### Advanced Example
 
 ```javascript
@@ -189,6 +225,7 @@ Convenience function for taking screenshots with simplified options.
   - `createDir` (boolean): Create directory if it doesn't exist (default: true)
   - `format` (string): Output format - 'png', 'jpg', 'jpeg', 'bmp', 'webp' (default: 'png')
   - `quality` (number): Quality for lossy formats, 1-100 (default: 100)
+  - `returnBase64` (boolean): Include base64 data in result (default: false)
 
 **Returns:** Promise resolving to result object
 
@@ -204,6 +241,7 @@ Main screenshot function with full control.
   - `verbose` (boolean): Show detailed information (default: false)
   - `format` (string): Output format - 'png', 'jpg', 'jpeg', 'bmp', 'webp' (default: 'png')
   - `quality` (number): Quality for lossy formats, 1-100 (default: 100)
+  - `returnBase64` (boolean): Include base64 data in result (default: false)
 
 **Returns:** Promise resolving to result object
 

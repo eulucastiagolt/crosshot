@@ -25,6 +25,8 @@ export interface ScreenshotResult {
   timestamp: string;
   format: string;
   metadata: ScreenshotMetadata;
+  base64?: string;      // Data URL format (data:image/png;base64,...)
+  base64Raw?: string;   // Raw base64 string
 }
 
 export interface ScreenshotError {
@@ -41,6 +43,7 @@ export interface ScreenshotOptions {
   verbose?: boolean;
   format?: 'png' | 'jpg' | 'jpeg' | 'bmp' | 'webp';
   quality?: number;
+  returnBase64?: boolean;  // Return base64 string instead of just file path
 }
 
 export interface CaptureScreenOptions {
@@ -51,6 +54,7 @@ export interface CaptureScreenOptions {
   createDir?: boolean;
   format?: 'png' | 'jpg' | 'jpeg' | 'bmp' | 'webp';
   quality?: number;
+  returnBase64?: boolean;  // Return base64 string in addition to file
 }
 
 /**

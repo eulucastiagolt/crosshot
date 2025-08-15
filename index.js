@@ -22,6 +22,7 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
       verbose: false,       // If true, shows more detailed information
       format: 'png',        // Screenshot format: png, jpg, jpeg, bmp, webp
       quality: 100,         // Quality for lossy formats (jpg, webp)
+      returnBase64: false,  // If true, returns base64 string instead of saving file
       ...options
     };
     
@@ -173,8 +174,8 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
             const sizeMB = (stats.size / (1024 * 1024)).toFixed(2);
             log(chalk.magenta('Size: ') + chalk.cyan(`${sizeKB} KB`));
             
-            // Return comprehensive success object for library usage
-            resolve({
+            // Prepare base result object
+            const result = {
               success: true,
               filename: filename,
               filepath: filepath,
@@ -194,7 +195,26 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
                 modified: stats.mtime,
                 permissions: stats.mode
               }
-            });
+            };
+
+            // Add base64 data if requested
+            if (config.returnBase64) {
+              try {
+                const imageBuffer = readFileSync(filepath);
+                const base64Data = imageBuffer.toString('base64');
+                const mimeType = getMimeType(normalizedFormat);
+                
+                result.base64 = `data:${mimeType};base64,${base64Data}`;
+                result.base64Raw = base64Data;
+                
+                log(chalk.blue('Base64 data generated'));
+              } catch (base64Error) {
+                log(chalk.yellow(`Warning: Could not generate base64: ${base64Error.message}`));
+              }
+            }
+            
+            // Return comprehensive success object for library usage
+            resolve(result);
           } else {
             log(chalk.red(`ERROR: Failed to save with ${toolName}, trying next...`));
             tryCommand(index + 1);
@@ -209,6 +229,18 @@ export function takeScreenshot(destinationDir = __dirname, customName = null, op
 
 // Export function for use in other modules
 export default takeScreenshot;
+
+// Helper function to get MIME type based on format
+function getMimeType(format) {
+  const mimeTypes = {
+    'png': 'image/png',
+    'jpg': 'image/jpeg',
+    'jpeg': 'image/jpeg',
+    'webp': 'image/webp',
+    'bmp': 'image/bmp'
+  };
+  return mimeTypes[format] || 'image/png';
+}
 
 // Function to get package version
 function getVersion() {
@@ -270,7 +302,8 @@ export async function captureScreen(options = {}) {
     verbose = false,
     createDir = true,
     format = 'png',
-    quality = 100
+    quality = 100,
+    returnBase64 = false
   } = options;
 
   try {
@@ -293,7 +326,8 @@ export async function captureScreen(options = {}) {
       silent, 
       verbose,
       format,
-      quality 
+      quality,
+      returnBase64
     });
     
     return result;
