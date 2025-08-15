@@ -41,6 +41,7 @@
     "type": "git",
     "url": "git+https://github.com/ltcodedev/crosshot.git"
   },
+  "readme": "README-NPM.md",
   "homepage": "https://github.com/ltcodedev/crosshot#readme",
   "bugs": {
     "url": "https://github.com/ltcodedev/crosshot/issues"
